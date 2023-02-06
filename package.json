@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@loadable/component": "^5.15.3",
+    "dat.gui": "^0.7.9",
+    "gsap": "^3.11.4",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "react": "^18.2.0",
@@ -23,6 +25,7 @@
     "three-orbitcontrols-ts": "^0.1.2"
   },
   "devDependencies": {
+    "@types/dat.gui": "^0.7.7",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@types/three": "^0.149.0",
