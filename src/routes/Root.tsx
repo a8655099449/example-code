@@ -1,5 +1,7 @@
 import { Form, NavLink, Outlet, useNavigation } from 'react-router-dom';
 
+import { routers } from './routes';
+
 export default function Root() {
   const { state } = useNavigation();
   return (
@@ -23,10 +25,12 @@ export default function Root() {
           </Form>
         </div>
         <nav>
-          <NavLink to={'/three/start'}>
-            three.js 正方快
-            <span>★</span>
-          </NavLink>
+          {routers.map(({ name, path }) => (
+            <NavLink to={path} key={name}>
+              {name}
+              <span>★</span>
+            </NavLink>
+          ))}
         </nav>
       </div>
       <div id="detail" className={state === 'loading' ? 'loading' : ''}>

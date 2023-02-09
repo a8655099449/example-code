@@ -1,7 +1,6 @@
 import dat from 'dat.gui';
 import gsap from 'gsap';
 import { useEffect, useRef } from 'react';
-import { Material } from 'three';
 
 import diamondImg from '../../assets/images/diamond_ore.png';
 import alpha from '../../assets/images/textures/door/alpha.jpg';
@@ -12,8 +11,9 @@ import metalnessImg from '../../assets/images/textures/door/metalness.jpg';
 import normalImg from '../../assets/images/textures/door/normal.jpg';
 import roughnessImg from '../../assets/images/textures/door/roughness.jpg';
 import { MyOrbitControls } from '../../types';
-import { OrbitControls, Three } from '../../utils';
+import { OrbitControls, THREE as Three } from '../../utils';
 import useBoxSize from '../../utils/hooks/useBoxSize';
+import { envImgs } from './imgs';
 
 type TRef = Partial<{
   render: Three.WebGLRenderer;
@@ -27,6 +27,7 @@ type TRef = Partial<{
   texture: Three.Texture;
   alphaTexture: Three.Texture;
   material: Three.MeshStandardMaterial;
+  loaderManger: Three.LoadingManager;
 }>;
 
 const useThree = () => {
@@ -55,8 +56,17 @@ const useThree = () => {
   /** @name 重新渲染 */
   const rerender = () => {
     const { scene, camera } = ref.current;
-    ref.current.render.render(scene, camera);
+    ref.current.render?.render(scene, camera);
   };
+
+  const onTextureLoad = () => {
+    console.log();
+  };
+
+  const onPressLoad = (...e) => {
+    console.log();
+  };
+
   /**
    * @name 添加灯光
    *
@@ -67,15 +77,21 @@ const useThree = () => {
     ref.current.scene.add(light);
     // todo 添加平行光 https://threejs.org/docs/index.html?q=light#api/en/lights/DirectionalLight
     const directionalLight = new Three.DirectionalLight('#fff', 1);
-
     directionalLight.position.set(1, 1, 1);
-
     ref.current.scene.add(directionalLight);
+  };
+  /** @name 添加加载管理器 */
+  const addLoadingManager = () => {
+    const loaderManger = new Three.LoadingManager(onTextureLoad, onPressLoad);
+
+    ref.current.loaderManger = loaderManger;
+
+    // const loader = new Three.ObjectLoader(loaderManger);
   };
 
   /** @name 导入纹理 */
   const loadTexture = () => {
-    const textureLoader = new Three.TextureLoader();
+    const textureLoader = new Three.TextureLoader(ref.current.loaderManger);
 
     const doorTexture = textureLoader.load(doorImg);
     const alphaTexture = textureLoader.load(alpha);
@@ -115,7 +131,6 @@ const useThree = () => {
   /** @name 添加几何体 */
   const addCube = () => {
     const cubeGeometry = new Three.BoxGeometry(1, 1, 1, 100, 100, 100);
-
     const {
       doorTexture,
       aoTexture,
@@ -175,6 +190,11 @@ const useThree = () => {
     ref.current.scene.add(plane);
     ref.current.plane = plane;
   };
+  /** @name 添加正方体贴图 */
+  const initCobeTextureLoader = () => {
+    const cubeTextureLoader = new Three.CubeTextureLoader();
+    const envLoadTexture = cubeTextureLoader.load(envImgs);
+  };
 
   /** @name 初始化场景 */
   const initScene = () => {
@@ -233,11 +253,15 @@ const useThree = () => {
   const startRender = () => {
     const { clientHeight, clientWidth } = dom.current as HTMLDivElement;
     initScene();
+
+    addLoadingManager();
+
     initCamera();
     addCube();
     addLight();
     // addGeometry();
     addPlane();
+
     // addRandomTriangle();
     const { scene, camera } = ref.current;
 
@@ -288,7 +312,6 @@ const useThree = () => {
       });
 
     const textureGui = gui.addFolder('贴图');
-    console.log('👴2023-02-06 15:15:57 useThree.ts line:193', texture);
     textureGui.add(texture.offset, 'x').name('贴图x偏移').max(1).min(-1);
     textureGui.add(texture.offset, 'y').name('贴图y偏移').max(1).min(-1);
     textureGui.add(texture, 'rotation').name('贴图旋转').max(Math.PI).min(0);
@@ -343,7 +366,7 @@ const useThree = () => {
     ref.current.render.forceContextLoss();
     ref.current.render.dispose();
     ref.current.scene.clear();
-    dom.current.removeChild(ref.current.render.domElement);
+    dom.current?.removeChild(ref.current.render.domElement);
     ref.current.render = null;
     gsap.killTweensOf(ref.current.cube);
 
