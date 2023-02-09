@@ -23,7 +23,12 @@ export const routers: MyRoute[] = [
   {
     Element: lazyLoad(() => import('../pages/three/shadow')),
     path: '/three/shadow',
-    name: '阴影效果',
+    name: '阴影和聚光灯',
+  },
+  {
+    Element: lazyLoad(() => import('../pages/three/pointLight')),
+    path: '/three/pointLight',
+    name: '点光源',
   },
 ];
 

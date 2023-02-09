@@ -17,7 +17,7 @@ type TRef = Partial<{
   alphaTexture: THREE.Texture;
   material: THREE.MeshStandardMaterial;
   loaderManger: THREE.LoadingManager;
-  directionalLight: THREE.DirectionalLight;
+  directionalLight: THREE.SpotLight;
 }>;
 
 type UseBaseTreeParams = Partial<{
@@ -79,17 +79,19 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
   const startAutoUpdate = () => {
     requestAnimationFrame(startAutoUpdate);
     rerender();
-    const { controls } = ref.current;
+    const { controls, directionalLight } = ref.current;
     controls?.update();
+
+    directionalLight?.shadow.camera.updateProjectionMatrix();
   };
   // todo 打光
   const initLight = () => {
     const light = new THREE.AmbientLight('#fff', 0.6);
     ref.current.scene.add(light);
-    const directionalLight = new THREE.DirectionalLight('#fff', 1);
-    directionalLight.position.set(1, 1, 1);
-    ref.current.scene.add(directionalLight);
-    ref.current.directionalLight = directionalLight;
+    // const directionalLight = new THREE.SpotLight('#fff', 1);
+    // directionalLight.position.set(1, 1, 1);
+    // ref.current.scene.add(directionalLight);
+    // ref.current.directionalLight = directionalLight;
   };
   // todo 添加gui控制器
 
