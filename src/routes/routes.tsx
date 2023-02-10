@@ -30,6 +30,16 @@ export const routers: MyRoute[] = [
     path: '/three/pointLight',
     name: '点光源',
   },
+  {
+    Element: lazyLoad(() => import('../pages/three/vrRoom')),
+    path: '/three/vrRoom',
+    name: 'vr看房',
+  },
+  {
+    Element: lazyLoad(() => import('../pages/three/land')),
+    path: '/three/land',
+    name: '小岛',
+  },
 ];
 
 export default createBrowserRouter([

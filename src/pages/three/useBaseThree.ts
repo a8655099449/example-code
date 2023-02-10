@@ -25,10 +25,11 @@ type UseBaseTreeParams = Partial<{
   onCreated?(): void; // 创建的回调函数
   gui: boolean; // 是否开启gui调试器
   light: boolean; // 是否自动加光
+  onUpdate?(): void;
 }>;
 
 export const useBaseTree = (params: UseBaseTreeParams = {}) => {
-  const { onCreated, renderColor = '#000', gui, light = true } = params;
+  const { onCreated, renderColor = '#000', gui, light = true, onUpdate } = params;
 
   const dom = useRef<HTMLDivElement>(null);
   const ref = useRef<TRef>({});
@@ -61,7 +62,10 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
   // todo 初始化渲染器
   const initRenderer = () => {
     const { clientHeight, clientWidth } = dom.current as HTMLDivElement;
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+    });
+    renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.setSize(clientWidth, clientHeight);
     renderer.setClearColor(renderColor);
     ref.current.renderer = renderer;
@@ -78,6 +82,7 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
   // todo 更新视图 但存在动画时就需要调用这个函数
   const startAutoUpdate = () => {
     requestAnimationFrame(startAutoUpdate);
+    onUpdate?.();
     rerender();
     const { controls, directionalLight } = ref.current;
     controls?.update();
