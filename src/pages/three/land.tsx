@@ -12,18 +12,19 @@ import {
   Vector2,
   VideoTexture,
 } from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Water } from 'three/examples/jsm/objects/Water2';
 
 import { three } from '../../utils';
-import { skyImg, skyVideo } from './imgs';
+import { bottle, skyImg, skyVideo } from './imgs';
 import { useBaseTree } from './useBaseThree';
-
 export default function land() {
   const videoDom = useRef<HTMLVideoElement>();
   const { dom, ref } = useBaseTree({
     onCreated() {
       useImg();
       initWaterPlane();
+      load3DModel();
     },
   });
   const useImg = () => {
@@ -72,6 +73,18 @@ export default function land() {
     ref.current.scene.add(water);
     ref.current.camera.position.set(5, 5, 5);
   }
+  /**
+   * @name 导入3d模型
+   * https://threejs.org/docs/index.html#manual/zh/introduction/Loading-3D-models
+   * */
+  const load3DModel = () => {
+    const loader = new GLTFLoader();
+
+    loader.load(bottle, (gltf) => {
+      gltf.scene.position.set(0, 2, 0);
+      ref.current.scene.add(gltf.scene);
+    });
+  };
 
   return (
     <div>

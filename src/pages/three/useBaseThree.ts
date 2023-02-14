@@ -1,5 +1,6 @@
 import { GUI } from 'dat.gui';
 import { useEffect, useRef } from 'react';
+import Stats from 'stats.js';
 
 import { MyOrbitControls } from '../../types';
 import { OrbitControls, THREE } from '../../utils/index';
@@ -18,18 +19,27 @@ type TRef = Partial<{
   material: THREE.MeshStandardMaterial;
   loaderManger: THREE.LoadingManager;
   directionalLight: THREE.SpotLight;
+  stats: Stats;
 }>;
 
 type UseBaseTreeParams = Partial<{
   renderColor: string; // 场景颜色
-  onCreated?(): void; // 创建的回调函数
+  onCreated(): void; // 创建的回调函数
   gui: boolean; // 是否开启gui调试器
   light: boolean; // 是否自动加光
-  onUpdate?(): void;
+  onUpdate(): void; // 更新触发的回调
+  axesHelper: boolean; // 是否添加坐标轴辅助
 }>;
 
 export const useBaseTree = (params: UseBaseTreeParams = {}) => {
-  const { onCreated, renderColor = '#000', gui, light = true, onUpdate } = params;
+  const {
+    onCreated,
+    renderColor = '#000',
+    gui,
+    light = true,
+    onUpdate,
+    axesHelper,
+  } = params;
 
   const dom = useRef<HTMLDivElement>(null);
   const ref = useRef<TRef>({});
@@ -37,8 +47,10 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
   // todo 1. 初始化场景
   const initScene = () => {
     const scene = new THREE.Scene();
-    const axes = new THREE.AxesHelper(5);
-    scene.add(axes);
+    if (axesHelper) {
+      const axes = new THREE.AxesHelper(5);
+      scene.add(axes);
+    }
     ref.current.scene = scene;
   };
   // todo 2. 初始化照相机
@@ -57,6 +69,13 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
     ref.current.controls = controls;
     controls.addEventListener('change', rerender);
     ref.current.controls.enableDamping = true;
+  };
+
+  const initStats = () => {
+    const stats = new Stats();
+    stats.showPanel(0);
+    dom.current.appendChild(stats.dom);
+    ref.current.stats = stats;
   };
 
   // todo 初始化渲染器
@@ -81,6 +100,10 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
   };
   // todo 更新视图 但存在动画时就需要调用这个函数
   const startAutoUpdate = () => {
+    ref.current.stats.begin();
+
+    // monitored code goes here
+
     requestAnimationFrame(startAutoUpdate);
     onUpdate?.();
     rerender();
@@ -88,10 +111,11 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
     controls?.update();
 
     directionalLight?.shadow.camera.updateProjectionMatrix();
+    ref.current.stats.end();
   };
   // todo 打光
   const initLight = () => {
-    const light = new THREE.AmbientLight('#fff', 0.6);
+    const light = new THREE.AmbientLight('#fff', 1);
     ref.current.scene.add(light);
     // const directionalLight = new THREE.SpotLight('#fff', 1);
     // directionalLight.position.set(1, 1, 1);
@@ -105,6 +129,7 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
   };
 
   const onMounted = () => {
+    initStats();
     initScene();
     initCamera();
     initRenderer();
@@ -112,7 +137,6 @@ export const useBaseTree = (params: UseBaseTreeParams = {}) => {
     light && initLight();
     startAutoUpdate();
     gui && initGui();
-
     onCreated?.();
   };
   const unMounted = () => {

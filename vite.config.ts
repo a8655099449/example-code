@@ -7,5 +7,5 @@ export default defineConfig({
   server: {
     port: 6688,
   },
-  assetsInclude: ['**/*.hdr'],
+  assetsInclude: ['**/*.hdr', '**/*.glb'],
 });

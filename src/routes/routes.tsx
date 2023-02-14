@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouteObject } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 
 import lazyLoad from '../components/Lazyload/lazyload';
 import ErrorPage from '../ErrorPage';
@@ -40,6 +40,11 @@ export const routers: MyRoute[] = [
     path: '/three/land',
     name: '小岛',
   },
+  {
+    Element: lazyLoad(() => import('../pages/three/Porsche')),
+    path: '/three/Porsche',
+    name: '保时捷',
+  },
 ];
 
 export default createBrowserRouter([
@@ -47,6 +52,12 @@ export default createBrowserRouter([
     path: '/',
     element: <Root />,
     errorElement: <ErrorPage />,
-    children: routers.map(({ Element, ...item }) => ({ ...item, element: <Element /> })),
+    children: [
+      ...routers.map(({ Element, ...item }) => ({ ...item, element: <Element /> })),
+      {
+        path: '/',
+        element: <Navigate to={'/three/shadow'} />,
+      },
+    ],
   },
 ]);
